@@ -56,6 +56,9 @@ POLICIES:
 Write like a friendly human, not a bot. Use plain conversational sentences only. Never use bullet points, dashes as list items, bold text, headers, asterisks, pound signs, or any markdown formatting whatsoever. Just talk naturally like a knowledgeable person at the front desk would. Keep answers short and direct. If you do not know something specific, tell them to call the shop.`
 
 export default defineConfig({
+  build: {
+    cssMinify: 'esbuild',
+  },
   plugins: [
     react(),
     {
