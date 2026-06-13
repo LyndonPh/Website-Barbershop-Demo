@@ -57,7 +57,7 @@ Write like a friendly human, not a bot. Use plain conversational sentences only.
 
 export default defineConfig({
   build: {
-    cssMinify: 'esbuild',
+    cssMinify: false,
   },
   plugins: [
     react(),
