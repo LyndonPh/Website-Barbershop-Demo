@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #0C0C0C;
+    color: #F0EDE6;
+  }
+
+  body {
+    margin: 0;
+    background-color: #0C0C0C;
+    color: #F0EDE6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    width: 100%;
+    background-color: #0C0C0C;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .gold-rule {
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background-color: #C8A96E;
+    margin-bottom: 1.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #C8A96E;
+  }
+
+  .section-divider {
+    width: 100%;
+    height: 1px;
+    background-color: #2A2A2A;
+  }
+
+  /* Gallery scroll-reveal cards */
+  .gallery-card {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+
+  .gallery-card--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .animate-fadein {
+    animation: fadein 0.6s ease forwards;
+  }
+
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .booking-input {
+    width: 100%;
+    background-color: #141414;
+    border: 1px solid #2A2A2A;
+    color: #F0EDE6;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+
+  .booking-input::placeholder {
+    color: #6B6560;
+  }
+
+  .booking-input:focus {
+    border-color: #C8A96E;
+  }
+
+  .booking-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  select.booking-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6560' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
+
+  input[type="date"].booking-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+  }
+}
