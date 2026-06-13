@@ -1,7 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
 
-export const config = { runtime: 'edge' }
-
 const SYSTEM_PROMPT = `You are a helpful assistant for The Chair, a premium barbershop with locations in Montreal and Toronto.
 
 LOCATIONS:
@@ -42,53 +40,49 @@ POLICIES:
 
 Write like a friendly human, not a bot. Use plain conversational sentences only. Never use bullet points, dashes as list items, bold text, headers, asterisks, pound signs, or any markdown formatting whatsoever. Just talk naturally like a knowledgeable person at the front desk would. Keep answers short and direct. If you do not know something specific, tell them to call the shop.`
 
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 })
+    res.status(405).end('Method Not Allowed')
+    return
   }
 
+  let body = ''
+  await new Promise((resolve, reject) => {
+    req.on('data', chunk => { body += chunk })
+    req.on('end', resolve)
+    req.on('error', reject)
+  })
+
   try {
-    const { messages } = await req.json()
+    const { messages } = JSON.parse(body)
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-    const encoder = new TextEncoder()
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const anthropicStream = await client.messages.stream({
-            model: 'claude-haiku-4-5',
-            max_tokens: 512,
-            system: SYSTEM_PROMPT,
-            messages,
-          })
-
-          for await (const chunk of anthropicStream) {
-            if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: chunk.delta.text })}\n\n`))
-            }
-          }
-
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-          controller.close()
-        } catch (err) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: err.message })}\n\n`))
-          controller.close()
-        }
-      },
+    const stream = await client.messages.stream({
+      model: 'claude-haiku-4-5',
+      max_tokens: 512,
+      system: SYSTEM_PROMPT,
+      messages,
     })
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    })
+    for await (const chunk of stream) {
+      if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+        res.write(`data: ${JSON.stringify({ text: chunk.delta.text })}\n\n`)
+      }
+    }
+
+    res.write('data: [DONE]\n\n')
+    res.end()
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    console.error('[chat-api]', err)
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message })
+    } else {
+      res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`)
+      res.end()
+    }
   }
 }
