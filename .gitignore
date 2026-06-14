@@ -26,3 +26,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+server/workout.db
+server/workout.db-shm
+server/workout.db-wal

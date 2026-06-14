@@ -1,114 +1,56 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import Home from "./pages/home/Home";
-import Services from "./pages/services/Services";
-import Team from "./pages/team/Team";
-import Contact from "./pages/contact/Contact";
-import Book from "./pages/book/Book";
-import Questions from "./pages/questions/Questions";
-import BookingConfirmed from "./pages/booking-confirmed/BookingConfirmed";
-import { ChatWidget } from "./components/ChatWidget";
+import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import Workout from './pages/Workout';
+import History from './pages/History';
+import Progress from './pages/Progress';
+import Settings from './pages/Settings';
 
-// Curtain that sweeps over the screen on every route change
-function Curtain() {
-  const location = useLocation();
-  const [key, setKey] = useState(0);
-  const isFirst = React.useRef(true);
-
-  useEffect(() => {
-    if (isFirst.current) { isFirst.current = false; return; }
-    setKey((k) => k + 1);
-  }, [location.pathname]);
+function NavBar() {
+  const links = [
+    { to: '/', label: 'Home', icon: '🏠' },
+    { to: '/history', label: 'History', icon: '📋' },
+    { to: '/progress', label: 'Progress', icon: '📈' },
+    { to: '/settings', label: 'Settings', icon: '⚙️' },
+  ];
 
   return (
-    <AnimatePresence>
-      <motion.div
-        key={key}
-        className="fixed inset-0 z-[200] pointer-events-none"
-        style={{ backgroundColor: "#0C0C0C", transformOrigin: "bottom" }}
-        initial={{ scaleY: 0 }}
-        animate={{
-          scaleY: [0, 1, 1, 0],
-          transformOrigin: ["bottom", "bottom", "top", "top"],
-        }}
-        transition={{
-          duration: 0.8,
-          times: [0, 0.35, 0.55, 1],
-          ease: [0.76, 0, 0.24, 1],
-        }}
-      >
-        {/* Gold rule that appears mid-sweep */}
-        <motion.div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          initial={{ opacity: 0, scaleX: 0 }}
-          animate={{ opacity: [0, 1, 1, 0], scaleX: [0, 1, 1, 0] }}
-          transition={{ duration: 0.8, times: [0.2, 0.4, 0.6, 0.85] }}
-        >
-          <div style={{ width: 60, height: 1, backgroundColor: "#C8A96E" }} />
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
-
-// Page wrapper — fades + lifts after curtain reveals it
-const pageVariants = {
-  initial: { opacity: 0, y: 18 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: 0.45, ease: [0.22, 0.61, 0.36, 1] },
-  },
-  exit: {
-    opacity: 0,
-    y: -12,
-    transition: { duration: 0.25, ease: [0.22, 0.61, 0.36, 1] },
-  },
-};
-
-function PageWrap({ children }) {
-  return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-      {children}
-    </motion.div>
-  );
-}
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [pathname]);
-  return null;
-}
-
-function AnimatedRoutes() {
-  const location = useLocation();
-  return (
-    <>
-      <Curtain />
-      <ScrollToTop />
-      <AnimatePresence mode="wait" initial={false}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageWrap><Home /></PageWrap>} />
-          <Route path="/services" element={<PageWrap><Services /></PageWrap>} />
-          <Route path="/team" element={<PageWrap><Team /></PageWrap>} />
-          <Route path="/contact" element={<PageWrap><Contact /></PageWrap>} />
-          <Route path="/book" element={<PageWrap><Book /></PageWrap>} />
-          <Route path="/questions" element={<PageWrap><Questions /></PageWrap>} />
-          <Route path="/booking-confirmed" element={<PageWrap><BookingConfirmed /></PageWrap>} />
-        </Routes>
-      </AnimatePresence>
-    </>
+    <nav className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 z-50">
+      <div className="max-w-lg mx-auto flex justify-around items-center h-16">
+        {links.map(({ to, label, icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${
+                isActive ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'
+              }`
+            }
+          >
+            <span className="text-xl">{icon}</span>
+            <span className="text-xs font-medium">{label}</span>
+          </NavLink>
+        ))}
+      </div>
+    </nav>
   );
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <AnimatedRoutes />
-      <ChatWidget />
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-20">
+        <div className="max-w-lg mx-auto">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/workout/:day" element={<Workout />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </div>
+      </div>
+      <NavBar />
     </BrowserRouter>
   );
 }
