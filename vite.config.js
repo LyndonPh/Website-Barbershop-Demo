@@ -59,6 +59,12 @@ export default defineConfig({
   build: {
     cssMinify: false,
   },
+  server: {
+    host: true,
+    proxy: {
+      '/api': 'http://localhost:3001',
+    },
+  },
   plugins: [
     react(),
     {
